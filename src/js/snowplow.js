@@ -75,7 +75,6 @@
 
 	// Load all our modules (at least until we fully modularize & remove grunt-concat)
 	var
-		tracker = require('./tracker'),
 		helpers = require('./lib/helpers'),
 		queue = require('./in_queue'),
 
@@ -200,10 +199,10 @@
 		helpers.addEventListener(windowAlias, 'beforeunload', beforeUnloadHandler, false);
 		addReadyListener();
 
-		asyncTracker = new tracker.Tracker(version, mutSnowplowState); // No argmap
+		//asyncTracker = new tracker.Tracker(version, mutSnowplowState); // No argmap
 
 		// Now replace initialization array with proxy object
-		windowAlias._snaq = new queue.AsyncQueueProxy(asyncTracker, windowAlias._snaq);
+		windowAlias._snaq = new queue.AsyncQueueProxy(version, mutSnowplowState, windowAlias._snaq);
 
 		/************************************************************
 		 * Public data and methods

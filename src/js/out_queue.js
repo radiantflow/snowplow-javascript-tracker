@@ -36,6 +36,7 @@
 
 	var
 		json2 = require('JSON'),
+		lodash = require('./lib/lodash'),
 		localStorageAccessible = require('./lib/detectors').localStorageAccessible(),
 		object = typeof exports !== 'undefined' ? exports : this, // For eventual node.js environment support
 
@@ -60,13 +61,13 @@
 	 * If we're not processing the queue, we'll start.
 	 */
 	object.queueImage = function(request, configCollectorUrl) {
-		imageQueue.push(request);
+		imageQueue.push([request, configCollectorUrl]);
 		if (localStorageAccessible) {
 			localStorage.setItem('snaqImageQueue', json2.stringify(imageQueue));
 		}
 
 		if (!executingQueue) {
-			executeQueue(configCollectorUrl);
+			executeQueue();
 		}
 	}
 
@@ -74,14 +75,15 @@
 	 * Run through the queue of image beacons, sending them one at a time.
 	 * Stops processing when we run out of queued requests, or we get an error.
 	 */
-	function executeQueue(configCollectorUrl) {
+	function executeQueue() {
 		if (imageQueue.length < 1) {
 			executingQueue = false;
 			return;
 		}
 
 		executingQueue = true;
-		var nextRequest = imageQueue[0];
+		var nextRequest = imageQueue[0][0],
+			collectorUrl = imageQueue[0][1];
 
 		/*
 		 * Send image request to the Snowplow Collector using GET.
@@ -90,7 +92,7 @@
 		var image = new Image(1,1);
 
 		// Let's check that we have a Url to ping
-		if (configCollectorUrl === null) {
+		if (!lodash.isString(collectorUrl)) {
 			throw "No Snowplow collector configured, cannot track";
 		}
 
@@ -101,14 +103,14 @@
 			if (localStorageAccessible) {
 				localStorage.setItem('snaqImageQueue', json2.stringify(imageQueue));
 			}
-			executeQueue(configCollectorUrl);
+			executeQueue();
 		}
 
 		image.onerror = function() {
 			executingQueue = false;
 		}
 
-		image.src = configCollectorUrl + nextRequest;
+		image.src = collectorUrl + nextRequest;
 	}
 
 }());

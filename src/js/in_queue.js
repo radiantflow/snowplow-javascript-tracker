@@ -36,6 +36,7 @@
 
 	var
 		lodash = require('./lib/lodash'),
+		tracker = require('./tracker'),
 		object = typeof exports !== 'undefined' ? exports : this; // For eventual node.js environment support
 
 	/************************************************************
@@ -44,7 +45,57 @@
 	 *   after the Tracker has been initialized and loaded
 	 ************************************************************/
 
-	object.AsyncQueueProxy = function(asyncTracker, asyncQueue) {
+	object.AsyncQueueProxy = function(version, mutSnowplowState, asyncQueue) {
+
+		var trackerDictionary = {};
+
+		function getNamedTrackers(names) {
+			var namedTrackers = [];
+			if (!names || names.length === 0) {
+				namedTrackers = lodash.values(trackerDictionary);
+			} else {
+				for (var i = 0; i < names.length; i++) {
+					if (trackerDictionary.hasOwnProperty(names[i])) {
+						namedTrackers.push(trackerDictionary[names[i]]);
+					}
+				}
+			}
+			
+			return namedTrackers;
+		}
+
+		function legacyHandleNewCollector(f, endpoint, namespace) {
+			var name;
+
+			if (lodash.isUndefined(namespace)) {
+				name = 'default'    // TODO: make default names work properly
+			} else {
+				name = namespace;
+			}
+
+			handleNewCollector(name);
+			trackerDictionary[name][f](endpoint);
+		}
+
+		function handleNewCollector(namespace) {
+			trackerDictionary[namespace] = new tracker.Tracker(version, mutSnowplowState) // TODO: what of argmap?
+		}
+
+		// Currently using Grunt argument syntax e.g. trackStructEvent:main;rt
+		function extractNames(string) {
+			var concatenatedNames = string.split(':')[1];
+
+			if (concatenatedNames) {
+				return concatenatedNames.split(';');
+			}
+			else {
+				return null;
+			}
+		}
+
+		function extractFunction(string) {
+			return string.split(':')[0];
+		}
 
 		/*
 		 * apply wrapper
@@ -55,16 +106,38 @@
 		 *      [ functionObject, optional_parameters ]
 		 */
 		function applyAsyncFunction() {
-			var i, f, parameterArray;
+			var i, f, parameterArray, inputString, names, namedTrackers;
 
+			// Outer loop in case someone push'es in zarg of arrays
 			for (i = 0; i < arguments.length; i += 1) {
 				parameterArray = arguments[i];
-				f = parameterArray.shift();
+				inputString = parameterArray.shift();
+				f = extractFunction(inputString);
+				names = extractNames(inputString);
+
+				if (f === 'newTracker') {
+					handleNewCollector(parameterArray[0]);
+					continue;
+				}
+
+				if (f === 'setCollectorCf' || f === 'setCollectorUrl') {
+					legacyHandleNewCollector(f, parameterArray[0], parameterArray[1]);
+					if (!lodash.isUndefined(console)) {
+						console.log(f, 'is deprecated.'); //TODO: more instructions for switching
+					}
+					continue;
+				}
+
+				namedTrackers = getNamedTrackers(names);
 
 				if (lodash.isString(f)) {
-					asyncTracker[f].apply(asyncTracker, parameterArray);
+					for (var j = 0; j < namedTrackers.length; j++) {
+						namedTrackers[j][f].apply(namedTrackers[j], parameterArray);
+					}
 				} else {
-					f.apply(asyncTracker, parameterArray);
+					for (var j = 0; j < namedTrackers.length; j++) {
+						f.apply(namedTrackers[j], parameterArray);
+					}
 				}
 			}
 		}

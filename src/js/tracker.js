@@ -280,7 +280,7 @@
 			var now = new Date();
 
 			if (!configDoNotTrack) {
-				images.queueImage(request, configCollectorUrl);
+				images.queueImage(request, configCollectorUrl)
 				mutSnowplowState.expireDateTime = now.getTime() + delay;
 			}
 		}
@@ -862,7 +862,7 @@
 				if (!scriptProtocol.test(sourceHref)) {
 
 					elementId = sourceElement.id;
-					elementClasses = lodash.map(sourceElement.classList);
+					elementClasses = lodash.values(sourceElement.classList);
 					elementTarget = sourceElement.target;
 
 					// decodeUrl %xx
@@ -949,7 +949,7 @@
 				if (linkElements) {
 					for (i = 0; i < linkElements.length; i++) {
 						excluded = false;
-						classArray = lodash.map(linkElements[i].classList);
+						classArray = lodash.values(linkElements[i].classList);
 						for (j = 0; j < classArray.length; j++) {
 							for (k = 0 ; k < excludedClasses.length; k++) {
 								if (classArray[j] === excludedClasses[k]) {
