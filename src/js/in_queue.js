@@ -36,6 +36,7 @@
 
 	var
 		lodash = require('./lib_managed/lodash'),
+		helpers = require('./lib/helpers'),
 		object = typeof exports !== 'undefined' ? exports : this; // For eventual node.js environment support
 
 	/************************************************************
@@ -63,7 +64,7 @@
 					if (trackerDictionary.hasOwnProperty(names[i])) {
 						namedTrackers.push(trackerDictionary[names[i]]);
 					} else if (!lodash.isUndefined(console)) {
-						console.log('Warning: Tracker namespace "' + names[i] + '" not configured');
+						helpers.warn('Warning: Tracker namespace "' + names[i] + '" not configured');
 					}
 				}
 			}
@@ -80,14 +81,12 @@
 		 * TODO: remove this in 2.1.0
 		 */
 		function legacyCreateNewNamespace(f, endpoint, namespace) {
-			if (!lodash.isUndefined(console)) {
-				console.log(f, 'is deprecated.'); //TODO: more instructions for switching
-			}
+			helpers.warn(f, 'is deprecated.'); //TODO: more instructions for switching
 
 			var name;
 
 			if (lodash.isUndefined(namespace)) {
-				name = 'sp'    // TODO: make default names work properly
+				name = 'sp';    // TODO: make default names work properly
 			} else {
 				name = namespace;
 			}
