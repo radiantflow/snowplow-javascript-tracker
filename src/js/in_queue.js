@@ -69,6 +69,11 @@
 					}
 				}
 			}
+
+			if (namedTrackers.length === 0) {
+				helpers.warn('Warning: No tracker configured');
+			}
+
 			return namedTrackers;
 		}
 
