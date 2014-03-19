@@ -140,7 +140,7 @@
 		 *      [ functionObject, optional_parameters ]
 		 */
 		function applyAsyncFunction() {
-			var i, f, parameterArray, inputString, names, namedTrackers;
+			var i, f, parameterArray, inputString, parsedString, names, namedTrackers;
 
 			// Outer loop in case someone push'es in zarg of arrays
 			for (i = 0; i < arguments.length; i += 1) {
