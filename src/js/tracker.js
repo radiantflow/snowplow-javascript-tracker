@@ -755,8 +755,7 @@
 				element_target: elementTarget,
 				target_url: targetUrl
 			},
-			true, context)
-
+			true, context);
 		}
 
 		/**
@@ -865,7 +864,7 @@
 				if (!scriptProtocol.test(sourceHref)) {
 
 					elementId = sourceElement.id;
-					elementClasses = lodash.values(sourceElement.classList);
+					elementClasses = lodash.map(sourceElement.classList);
 					elementTarget = sourceElement.target;
 
 					// decodeUrl %xx
@@ -952,7 +951,7 @@
 				if (linkElements) {
 					for (i = 0; i < linkElements.length; i++) {
 						excluded = false;
-						classArray = lodash.values(linkElements[i].classList);
+						classArray = lodash.map(linkElements[i].classList);
 						for (j = 0; j < classArray.length; j++) {
 							for (k = 0 ; k < excludedClasses.length; k++) {
 								if (classArray[j] === excludedClasses[k]) {
