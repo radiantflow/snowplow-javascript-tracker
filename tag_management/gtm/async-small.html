@@ -1,0 +1,96 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+        "http://www.w3.org/TR/html4/loose.dtd">
+<!-- 
+ ! Copyright (c) 2012-2013 Snowplow Analytics Ltd. All rights reserved.
+ !
+ ! This program is licensed to you under the Apache License Version 2.0,
+ ! and you may not use this file except in compliance with the Apache License Version 2.0.
+ ! You may obtain a copy of the Apache License Version 2.0 at http://www.apache.org/licenses/LICENSE-2.0.
+ !
+ ! Unless required by applicable law or agreed to in writing,
+ ! software distributed under the Apache License Version 2.0 is distributed on an
+ ! "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ ! See the Apache License Version 2.0 for the specific language governing permissions and limitations there under.
+ -->
+<html>
+<head>
+    <title>Small asynchronous website/webapp examples for snowplow.js using Google Tag Manager</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+
+
+    <!-- Example events -->
+    <script type="text/javascript">
+
+        function playMix() {
+            alert("Playing a DJ mix");          
+            dataLayer.push({'event': 'Play', 'event_category': 'Mixes', 'mix_id': 'MRC/fabric-0503-mix', 'value': '0.0'});
+        }
+        function addProduct() {
+            alert("Adding a product to basket");           
+            dataLayer.push('event': 'add', 'event_category': 'Checkout', 'value': '2.0', 'context': [{
+              schema: 'iglu://com.acme_company/user/jsonschema/1-0-0',
+              data: { fbUid: '123456 x' }
+            }]);
+        }
+        function viewProduct() {
+            alert("Viewing a product");          
+            dataLayer.push('event': 'unstruct_event', 'properties': {
+                schema: 'iglu://com.acme_company/viewed_product/jsonschema/5-0-0',
+                data: {
+                    productId: 'ASO01043',
+                    category: 'Dresses',
+                    brand: 'ACME',
+                    returning: true,
+                    price: 49.95,
+                    sizes: ['xs', 's', 'l', 'xl', 'xxl'],
+                    availableSince: new Date(2013,3,7)
+              }
+            });
+        }
+
+        function addEcommerceTransaction() {
+          alert('Adding an ecommerce transaction');
+
+          var orderId = 'order-123';
+
+          dataLayer.push({'event': 'addTrans', 'id': orderId, 'total': 8000, 'currency': 'JPY'})
+          dataLayer.push({'event': 'addItem', 'id': orderId, 'sku': '1001', 'name': 'Blue t-shirt', 'price': '2000', 'quantity': 2, 'currency': 'JPY', context: [{                      // context
+                schema: "iglu://com.example_company/products/jsonschema/1-0-0",
+                data: {
+                  "launchDate": new Date(2013,3,7)
+                }
+              }]});
+          dataLayer.push({'event': 'addItem', 'id': orderId 'sku': '1002', 'name': 'Red shoes', 'price': '4000', 'quantity': 1, 'currency': 'JPY');
+          dataLayer.push({'event': 'trackTrans'});
+
+        }
+    </script>
+</head>
+
+<body>
+    
+      <!-- Google Tag Manager -->
+      <noscript><iframe src="//www.googletagmanager.com/ns.html?id=GTM-XXXX"
+      height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+      <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+      new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+      j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+      '//www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+      })(window,document,'script','dataLayer','GTM-XXXX');</script>
+      <!-- End Google Tag Manager -->
+    
+    <h1>Small_asynchronous_examples_for_snowplow.js</h1>
+    <p>Press the buttons below to trigger individual tracking events:<br>
+        <button type="button" onclick="playMix()">Play a mix</button><br>
+        <button type="button" onclick="addProduct()">Add a product</button><br>
+        <button type="button" onclick="viewProduct()">View a product</button><br>
+        <button type="button" onclick="addEcommerceTransaction()">Add an ecommerce transaction</button>
+    </p>
+    <p>Warning: if your browser's Do Not Track feature is enabled and respectDoNotTrack is not commented out, all tracking will be prevented.</p>
+    <a href=http://en.wikipedia.org/wiki/Main_Page id=legal target="_blank" class="link out">Link</a>
+    <br>
+    <a href=http://en.wikipedia.org/wiki/Main_Page id=illegal class="class barred">Ignored link</a>
+
+</body>
+
+</html>
