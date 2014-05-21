@@ -22,19 +22,24 @@
     <script type="text/javascript">
 
         function playMix() {
-            alert("Playing a DJ mix");          
-            dataLayer.push({'event': 'Play', 'event_category': 'Mixes', 'mix_id': 'MRC/fabric-0503-mix', 'value': '0.0'});
+            alert("Playing a DJ mix");
+            dataLayer.push({'event': 'Play', 'mixName': 'MRC/fabric-0503-mix', 'mixValue': '0.0'});
         }
         function addProduct() {
-            alert("Adding a product to basket");           
-            dataLayer.push('event': 'add', 'event_category': 'Checkout', 'value': '2.0', 'context': [{
+            alert("Adding a product to basket");    
+            dataLayer.push({
+              'event': 'add-product', 
+              'productId': 'ASO01043', 
+              'productDescripton': 'blue:xxl', 
+              'productPrice': '2.0', 
+              'context': [{
               schema: 'iglu://com.acme_company/user/jsonschema/1-0-0',
               data: { fbUid: '123456 x' }
-            }]);
+            }]});
         }
         function viewProduct() {
             alert("Viewing a product");          
-            dataLayer.push('event': 'unstruct_event', 'properties': {
+            dataLayer.push({'event': 'view-product', 'properties': {
                 schema: 'iglu://com.acme_company/viewed_product/jsonschema/5-0-0',
                 data: {
                     productId: 'ASO01043',
@@ -45,7 +50,7 @@
                     sizes: ['xs', 's', 'l', 'xl', 'xxl'],
                     availableSince: new Date(2013,3,7)
               }
-            });
+            }});
         }
 
         function addEcommerceTransaction() {
@@ -53,33 +58,46 @@
 
           var orderId = 'order-123';
 
-          dataLayer.push({'event': 'addTrans', 'id': orderId, 'total': 8000, 'currency': 'JPY'})
-          dataLayer.push({'event': 'addItem', 'id': orderId, 'sku': '1001', 'name': 'Blue t-shirt', 'price': '2000', 'quantity': 2, 'currency': 'JPY', context: [{                      // context
-                schema: "iglu://com.example_company/products/jsonschema/1-0-0",
-                data: {
-                  "launchDate": new Date(2013,3,7)
-                }
-              }]});
-          dataLayer.push({'event': 'addItem', 'id': orderId 'sku': '1002', 'name': 'Red shoes', 'price': '4000', 'quantity': 1, 'currency': 'JPY');
-          dataLayer.push({'event': 'trackTrans'});
+          var products = [
+          {
+            sku: '1001',
+            name: 'Blue t-shirt',
+            unitPrice: '2000',
+            quantity: '2',
+            context: [{                      // context
+              schema: "iglu://com.example_company/products/jsonschema/1-0-0",
+              data: {
+                "launchDate": new Date(2013,3,7)
+              }
+            }]
+          },
+          {
+            sku: '1002',
+            name: 'Red shoes',
+            unitPrice: '4000',
+            quantity: '1'
+          }
+          ];
+
+          dataLayer.push({'event': 'Transaction', 'transactionId': orderId, 'total': 8000, 'currency': 'JPY', 'products': products});
 
         }
     </script>
 </head>
 
 <body>
-    
+
       <!-- Google Tag Manager -->
-      <noscript><iframe src="//www.googletagmanager.com/ns.html?id=GTM-XXXX"
+      <noscript><iframe src="//www.googletagmanager.com/ns.html?id=GTM-NR8JFV"
       height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
       new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
       j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
       '//www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
-      })(window,document,'script','dataLayer','GTM-XXXX');</script>
+      })(window,document,'script','dataLayer','GTM-NR8JFV');</script>
       <!-- End Google Tag Manager -->
     
-    <h1>Small_asynchronous_examples_for_snowplow.js</h1>
+    <h1>Small_asynchronous_examples_for_snowplow.js_using_GTM</h1>
     <p>Press the buttons below to trigger individual tracking events:<br>
         <button type="button" onclick="playMix()">Play a mix</button><br>
         <button type="button" onclick="addProduct()">Add a product</button><br>
