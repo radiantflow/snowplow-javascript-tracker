@@ -23,7 +23,11 @@
 
         function playMix() {
             alert("Playing a DJ mix");
-            dataLayer.push({'event': 'Play', 'mixName': 'MRC/fabric-0503-mix', 'mixValue': '0.0'});
+            dataLayer.push({
+              'event': 'Play', 
+              'mixName': 'MRC/fabric-0503-mix', 
+              'mixValue': '0.0'
+            });
         }
         function addProduct() {
             alert("Adding a product to basket");    
@@ -79,7 +83,13 @@
           }
           ];
 
-          dataLayer.push({'event': 'Transaction', 'transactionId': orderId, 'total': 8000, 'currency': 'JPY', 'products': products});
+          dataLayer.push({
+            'event': 'Transaction', 
+            'transactionId': orderId, 
+            'transactionTotal': 8000, 
+            'transactionCurrency': 'JPY', 
+            'transactionProducts': products
+          });
 
         }
     </script>
