@@ -137,7 +137,7 @@
 
 			// First-party cookie path
 			// Default is user agent defined.
-			configCookiePath,
+			configCookiePath = '/',
 
 			configWriteCookies = argmap.hasOwnProperty('writeCookies') ? argmap.writeCookies : true,
 
