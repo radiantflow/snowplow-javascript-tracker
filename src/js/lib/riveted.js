@@ -6,7 +6,7 @@
  * Licensed under the MIT license
  */
 
-var riveted = (function() {
+;(function() {
 
     var started = false,
       stopped = false,
@@ -255,4 +255,5 @@ var riveted = (function() {
       off: turnOff
     };
 
-  })();
+})();
+
