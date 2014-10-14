@@ -8,252 +8,287 @@
 
 ;(function() {
 
-    var started = false,
-      stopped = false,
-      turnedOff = false,
-      clockTime = 0,
-      startTime = new Date(),
-      clockTimer = null,
-      idleTimer = null,
-      sendEvent,
-      sendUserTiming,
-      reportInterval,
-      idleTimeout,
-      nonInteraction,
-      universalGA,
-      classicGA,
-      googleTagManager;
+	var
+		lodash = require('../lib_managed/lodash'),
 
-    function init(options) {
+		object = typeof exports !== 'undefined' ? exports : this; // For eventual node.js environment support
 
-      /*
-       * Determine which version of GA is being used
-       * "ga", "_gaq", and "dataLayer" are the possible globals
-       */
-
-      if (typeof ga === "function") {
-        universalGA = true;
-      }
-
-      if (typeof _gaq !== "undefined" && typeof _gaq.push === "function") {
-        classicGA = true;
-      }
-
-      if (typeof dataLayer !== "undefined" && typeof dataLayer.push === "function") {
-        googleTagManager = true;
-      }
-
-      // Set up options and defaults
-      options = options || {};
-      reportInterval = parseInt(options.reportInterval, 10) || 5;
-      idleTimeout = parseInt(options.idleTimeout, 10) || 30;
-
-      if (typeof options.eventHandler == 'function') {
-          sendEvent = options.eventHandler;
-      }
-
-      if (typeof options.userTimingHandler == 'function') {
-          sendUserTiming = options.userTimingHandler;
-      }
-
-      if ('nonInteraction' in options && (options.nonInteraction === false || options.nonInteraction === 'false')) {
-        nonInteraction = false;
-      } else {
-        nonInteraction = true;
-      }
-
-      // Basic activity event listeners
-      addListener(document, 'keydown', trigger);
-      addListener(document, 'click', trigger);
-      addListener(window, 'mousemove', throttle(trigger, 500));
-      addListener(window, 'scroll', throttle(trigger, 500));
-
-      // Page visibility listeners
-      addListener(document, 'visibilitychange', visibilityChange);
-      addListener(document, 'webkitvisibilitychange', visibilityChange);
-    }
+	/*
+	 * Only log deprecation warnings if they won't cause an error
+	 */
+//	object.warn = function(message) {
+//		if (typeof console !== 'undefined') {
+//			console.warn('Snowplow: ' + message);
+//		}
+//	}
 
 
-    /*
-     * Throttle function borrowed from:
-     * Underscore.js 1.5.2
-     * http://underscorejs.org
-     * (c) 2009-2013 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
-     * Underscore may be freely distributed under the MIT license.
-     */
+	object.Riveted = function Riveted(options) {
+		var
+			started = false,
+			stopped = false,
+			turnedOff = false,
+			clockTime = 0,
+			startTime = new Date(),
+			clockTimer = null,
+			idleTimer = null,
+			sendEvent,
+			sendUserTiming,
+			reportInterval,
+			idleTimeout,
+			nonInteraction,
+			universalGA,
+			classicGA,
+			googleTagManager;
 
-    function throttle(func, wait) {
-      var context, args, result;
-      var timeout = null;
-      var previous = 0;
-      var later = function() {
-        previous = new Date;
-        timeout = null;
-        result = func.apply(context, args);
-      };
-      return function() {
-        var now = new Date;
-        if (!previous) previous = now;
-        var remaining = wait - (now - previous);
-        context = this;
-        args = arguments;
-        if (remaining <= 0) {
-          clearTimeout(timeout);
-          timeout = null;
-          previous = now;
-          result = func.apply(context, args);
-        } else if (!timeout) {
-          timeout = setTimeout(later, remaining);
-        }
-        return result;
-      };
-    }
 
-    /*
-     * Cross-browser event listening
-     */
+		function init(options) {
 
-    function addListener(element, eventName, handler) {
-      if (element.addEventListener) {
-        element.addEventListener(eventName, handler, false);
-      }
-      else if (element.attachEvent) {
-        element.attachEvent('on' + eventName, handler);
-      }
-      else {
-        element['on' + eventName] = handler;
-      }
-    }
+			/*
+			 * Determine which version of GA is being used
+			 * "ga", "_gaq", and "dataLayer" are the possible globals
+			 */
 
-    /*
-     * Function for logging User Timing event on initial interaction
-     */
+			if (typeof ga === "function") {
+				universalGA = true;
+			}
 
-    sendUserTiming = function (timingValue) {
+			if (typeof _gaq !== "undefined" && typeof _gaq.push === "function") {
+				classicGA = true;
+			}
 
-      if (googleTagManager) {
+			if (typeof dataLayer !== "undefined" && typeof dataLayer.push === "function") {
+				googleTagManager = true;
+			}
 
-        dataLayer.push({'event':'RivetedTiming', 'eventCategory':'Riveted', 'timingVar': 'First Interaction', 'timingValue': timingValue});
+			// Set up options and defaults
+			options = options || {};
+			reportInterval = parseInt(options.reportInterval, 10) || 5;
+			idleTimeout = parseInt(options.idleTimeout, 10) || 30;
 
-      } else {
+			if (typeof options.eventHandler == 'function') {
+				sendEvent = options.eventHandler;
+			}
 
-        if (universalGA) {
-          ga('send', 'timing', 'Riveted', 'First Interaction', timingValue);
-        }
+			if (typeof options.userTimingHandler == 'function') {
+				sendUserTiming = options.userTimingHandler;
+			}
 
-        if (classicGA) {
-          _gaq.push(['_trackTiming', 'Riveted', 'First Interaction', timingValue, null, 100]);
-        }
+			if ('nonInteraction' in options && (options.nonInteraction === false || options.nonInteraction === 'false')) {
+				nonInteraction = false;
+			} else {
+				nonInteraction = true;
+			}
 
-      }
+			// Basic activity event listeners
+			addListener(document, 'keydown', trigger);
+			addListener(document, 'click', trigger);
+			addListener(window, 'mousemove', throttle(trigger, 500));
+			addListener(window, 'scroll', throttle(trigger, 500));
 
-    };
+			// Page visibility listeners
+			addListener(document, 'visibilitychange', visibilityChange);
+			addListener(document, 'webkitvisibilitychange', visibilityChange);
+		}
 
-    /*
-     * Function for logging ping events
-     */
+		/*
+		 * Cross-browser event listening
+		 */
 
-    sendEvent = function (time) {
+		function addListener(element, eventName, handler) {
+			if (element.addEventListener) {
+				element.addEventListener(eventName, handler, false);
+			}
+			else if (element.attachEvent) {
+				element.attachEvent('on' + eventName, handler);
+			}
+			else {
+				element['on' + eventName] = handler;
+			}
+		}
 
-      if (googleTagManager) {
+		/*
+		 * Throttle function borrowed from:
+		 * Underscore.js 1.5.2
+		 * http://underscorejs.org
+		 * (c) 2009-2013 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
+		 * Underscore may be freely distributed under the MIT license.
+		 */
 
-        dataLayer.push({'event':'Riveted', 'eventCategory':'Riveted', 'eventAction': 'Time Spent', 'eventLabel': time, 'eventValue': reportInterval, 'eventNonInteraction': nonInteraction});
+		function throttle(func, wait) {
+			var context, args, result;
+			var timeout = null;
+			var previous = 0;
+			var later = function () {
+				previous = new Date;
+				timeout = null;
+				result = func.apply(context, args);
+			};
+			return function () {
+				var now = new Date;
+				if (!previous) previous = now;
+				var remaining = wait - (now - previous);
+				context = this;
+				args = arguments;
+				if (remaining <= 0) {
+					clearTimeout(timeout);
+					timeout = null;
+					previous = now;
+					result = func.apply(context, args);
+				} else if (!timeout) {
+					timeout = setTimeout(later, remaining);
+				}
+				return result;
+			};
+		}
 
-      } else {
+		/*
+		 * Function for logging User Timing event on initial interaction
+		 */
 
-        if (universalGA) {
-          ga('send', 'event', 'Riveted', 'Time Spent', time.toString(), reportInterval, {'nonInteraction': nonInteraction});
-        }
+		sendUserTiming = function (timingValue) {
 
-        if (classicGA) {
-          _gaq.push(['_trackEvent', 'Riveted', 'Time Spent', time.toString(), reportInterval, nonInteraction]);
-        }
+			if (googleTagManager) {
 
-      }
+				dataLayer.push({'event': 'RivetedTiming', 'eventCategory': 'Riveted', 'timingVar': 'First Interaction', 'timingValue': timingValue});
 
-    };
+			} else {
 
-    function setIdle() {
-      clearTimeout(idleTimer);
-      stopClock();
-    }
+				if (universalGA) {
+					ga('send', 'timing', 'Riveted', 'First Interaction', timingValue);
+				}
 
-    function visibilityChange() {
-      if (document.hidden || document.webkitHidden) {
-        setIdle();
-      }
-    }
+				if (classicGA) {
+					_gaq.push(['_trackTiming', 'Riveted', 'First Interaction', timingValue, null, 100]);
+				}
 
-    function clock() {
-      clockTime += 1;
-      if (clockTime > 0 && (clockTime % reportInterval === 0)) {
-        sendEvent(clockTime);
-      }
+			}
 
-    }
+		};
 
-    function stopClock() {
-      stopped = true;
-      clearTimeout(clockTimer);
-    }
+		/*
+		 * Function for logging ping events
+		 */
 
-    function turnOff() {
-      setIdle();
-      turnedOff = true;
-    }
+		sendEvent = function (time) {
 
-    function turnOn() {
-      turnedOff = false;
-    }
+			if (googleTagManager) {
 
-    function restartClock() {
-      stopped = false;
-      clearTimeout(clockTimer);
-      clockTimer = setInterval(clock, 1000);
-    }
+				dataLayer.push({'event': 'Riveted', 'eventCategory': 'Riveted', 'eventAction': 'Time Spent', 'eventLabel': time, 'eventValue': reportInterval, 'eventNonInteraction': nonInteraction});
 
-    function startRiveted() {
+			} else {
 
-      // Calculate seconds from start to first interaction
-      var currentTime = new Date();
-      var diff = currentTime - startTime;
+				if (universalGA) {
+					ga('send', 'event', 'Riveted', 'Time Spent', time.toString(), reportInterval, {'nonInteraction': nonInteraction});
+				}
 
-      // Set global
-      started = true;
+				if (classicGA) {
+					_gaq.push(['_trackEvent', 'Riveted', 'Time Spent', time.toString(), reportInterval, nonInteraction]);
+				}
 
-      // Send User Timing Event
-      sendUserTiming(diff);
+			}
 
-      // Start clock
-      clockTimer = setInterval(clock, 1000);
+		};
 
-    }
+		function setIdle() {
+			clearTimeout(idleTimer);
+			stopClock();
+		}
 
-    function trigger() {
+		function visibilityChange() {
+			if (document.hidden || document.webkitHidden) {
+				setIdle();
+			}
+		}
 
-      if (turnedOff) {
-        return;
-      }
+		function clock() {
+			clockTime += 1;
+			if (clockTime > 0 && (clockTime % reportInterval === 0)) {
+				sendEvent(clockTime);
+			}
 
-      if (!started) {
-        startRiveted();
-      }
+		}
 
-      if (stopped) {
-        restartClock();
-      }
+		function stopClock() {
+			stopped = true;
+			clearTimeout(clockTimer);
+		}
 
-      clearTimeout(idleTimer);
-      idleTimer = setTimeout(setIdle, idleTimeout * 1000 + 100);
-    }
+		function turnOff() {
+			setIdle();
+			turnedOff = true;
+		}
 
-    return {
-      init: init,
-      trigger: trigger,
-      setIdle: setIdle,
-      on: turnOn,
-      off: turnOff
-    };
+		function turnOn() {
+			turnedOff = false;
+		}
+
+		function restartClock() {
+			stopped = false;
+			clearTimeout(clockTimer);
+			clockTimer = setInterval(clock, 1000);
+		}
+
+		function startRiveted() {
+
+			// Calculate seconds from start to first interaction
+			var currentTime = new Date();
+			var diff = currentTime - startTime;
+
+			// Set global
+			started = true;
+
+			// Send User Timing Event
+			sendUserTiming(diff);
+
+			// Start clock
+			clockTimer = setInterval(clock, 1000);
+
+		}
+
+		function trigger() {
+
+			if (turnedOff) {
+				return;
+			}
+
+			if (!started) {
+				startRiveted();
+			}
+
+			if (stopped) {
+				restartClock();
+			}
+
+			clearTimeout(idleTimer);
+			idleTimer = setTimeout(setIdle, idleTimeout * 1000 + 100);
+		}
+
+		/************************************************************
+		 * Constructor
+		 ************************************************************/
+
+		/*
+		 * Initialize tracker
+		 */
+		init(options);
+
+
+		/************************************************************
+		 * Public data and methods
+		 ************************************************************/
+
+		return {
+			init: init,
+			trigger: trigger,
+			setIdle: setIdle,
+			on: turnOn,
+			off: turnOff
+		};
+
+
+	}
+
 
 })();
 

@@ -44,6 +44,7 @@
 		json2 = require('JSON'),
 		sha1 = require('sha1'),
 		requestQueue = require('./out_queue'),
+		riveted = require('./lib/riveted'),
 
 		object = typeof exports !== 'undefined' ? exports : this; // For eventual node.js environment support
 
@@ -583,6 +584,9 @@
 
 			// Fixup page title. We'll pass this to logPagePing too.
 			var pageTitle = helpers.fixupTitle(customTitle || configTitle);
+
+			// Start Engagement Timer
+			riveted.Riveted();
 
 			// Log page view
 			var sb = payload.payloadBuilder(configEncodeBase64);

@@ -78,7 +78,6 @@
 		helpers = require('./lib/helpers'),
 		queue = require('./in_queue'),
 		tracker = require('./tracker'),
-		riveted = require('./lib/riveted'),
 
 		object = typeof exports !== 'undefined' ? exports : this; // For eventual node.js environment support
 
