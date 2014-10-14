@@ -13,7 +13,7 @@
 
 		object = typeof exports !== 'undefined' ? exports : this; // For eventual node.js environment support
 
-	object.Riveted = function Riveted(options) {
+	object.Timer = function Timer() {
 
 		var
 			// Aliases
@@ -27,8 +27,6 @@
 			startTime = new Date(),
 			clockTimer = null,
 			idleTimer = null,
-			sendEvent,
-			sendUserTiming,
 			reportInterval,
 			idleTimeout;
 
@@ -39,14 +37,6 @@
 			options = options || {};
 			reportInterval = parseInt(options.reportInterval, 10) || 5;
 			idleTimeout = parseInt(options.idleTimeout, 10) || 30;
-
-			if (typeof options.eventHandler == 'function') {
-				sendEvent = options.eventHandler;
-			}
-
-			if (typeof options.userTimingHandler == 'function') {
-				sendUserTiming = options.userTimingHandler;
-			}
 
 			// Basic activity event listeners
 			helpers.addEventListener(documentAlias, 'keydown', trigger);
@@ -95,21 +85,7 @@
 			};
 		}
 
-		/*
-		 * Function for logging User Timing event on initial interaction
-		 */
 
-		sendUserTiming = function (timingValue) {
-			//ga('send', 'timing', 'Riveted', 'First Interaction', timingValue);
-		};
-
-		/*
-		 * Function for logging ping events
-		 */
-
-		sendEvent = function (time) {
-			//dataLayer.push({'event': 'Riveted', 'eventCategory': 'Riveted', 'eventAction': 'Time Spent', 'eventLabel': time, 'eventValue': reportInterval, 'eventNonInteraction': nonInteraction});
-		};
 
 		function setIdle() {
 			clearTimeout(idleTimer);
@@ -124,10 +100,6 @@
 
 		function clock() {
 			clockTime += 1;
-			if (clockTime > 0 && (clockTime % reportInterval === 0)) {
-				sendEvent(clockTime);
-			}
-
 		}
 
 		function stopClock() {
@@ -159,12 +131,8 @@
 			// Set global
 			started = true;
 
-			// Send User Timing Event
-			sendUserTiming(diff);
-
 			// Start clock
 			clockTimer = setInterval(clock, 1000);
-
 		}
 
 		function trigger() {
@@ -185,14 +153,9 @@
 			idleTimer = setTimeout(setIdle, idleTimeout * 1000 + 100);
 		}
 
-		/************************************************************
-		 * Constructor
-		 ************************************************************/
-
-		/*
-		 * Initialize tracker
-		 */
-		init(options);
+		function time() {
+			return clockTime;
+		}
 
 
 		/************************************************************
@@ -204,7 +167,8 @@
 			trigger: trigger,
 			setIdle: setIdle,
 			on: turnOn,
-			off: turnOff
+			off: turnOff,
+			time: time
 		};
 
 

@@ -194,6 +194,11 @@
 			// Guard against installing the activity tracker more than once per Tracker instance
 			activityTrackingInstalled = false,
 
+			// Engagement tracking
+			engagementTrackingEnabled = false,
+			engagementTrackingOptions,
+			engagementTimer = new riveted.Timer(),
+
 			// Last activity timestamp
 			lastActivityTime,
 
@@ -585,8 +590,10 @@
 			// Fixup page title. We'll pass this to logPagePing too.
 			var pageTitle = helpers.fixupTitle(customTitle || configTitle);
 
-			// Start Engagement Timer
-			riveted.Riveted();
+			// Start Engagement Timer if enabled.
+			if (engagementTrackingEnabled) {
+				engagementTimer.init(engagementTrackingOptions);
+			}
 
 			// Log page view
 			var sb = payload.payloadBuilder(configEncodeBase64);
@@ -657,6 +664,10 @@
 			sb.addRaw('pp_may', maxYOffset); // Global
 			sb.addRaw('pp_height', de.scrollHeight);
 			sb.addRaw('pp_width', de.scrollWidth);
+
+			if (engagementTrackingEnabled) {
+				sb.addRaw('et', engagementTimer.time());
+			}
 			sb.addJson('cx', 'co', completeContext(context));
 			resetMaxScrolls();
 			var request = getRequest(sb);
@@ -1270,6 +1281,17 @@
 
 				configMinimumVisitTime = now.getTime() + minimumVisitLength * 1000;
 				configHeartBeatTimer = heartBeatDelay * 1000;
+			},
+
+			/**
+			 * Enables engagement tracking timer.
+			 *
+			 * @param object options Options for engagement tracking.
+			 */
+			enableEngagementTracking: function (options) {
+				//options = options || {};
+				engagementTrackingEnabled = true;
+				engagementTrackingOptions = options
 			},
 
 			/**
