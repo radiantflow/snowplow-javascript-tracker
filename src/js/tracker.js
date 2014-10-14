@@ -644,12 +644,15 @@
 		 */
 		function logPagePing(pageTitle, context) {
 			var sb = payload.payloadBuilder(configEncodeBase64);
+			var de = documentAlias.documentElement; // Alias
 			sb.add('e', 'pp'); // 'pp' for Page Ping
 			sb.add('page', pageTitle);
 			sb.addRaw('pp_mix', minXOffset); // Global
 			sb.addRaw('pp_max', maxXOffset); // Global
 			sb.addRaw('pp_miy', minYOffset); // Global
 			sb.addRaw('pp_may', maxYOffset); // Global
+			sb.addRaw('pp_height', de.scrollHeight);
+			sb.addRaw('pp_width', de.scrollWidth);
 			sb.addJson('cx', 'co', completeContext(context));
 			resetMaxScrolls();
 			var request = getRequest(sb);
