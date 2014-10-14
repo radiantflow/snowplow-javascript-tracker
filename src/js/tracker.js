@@ -44,7 +44,7 @@
 		json2 = require('JSON'),
 		sha1 = require('sha1'),
 		requestQueue = require('./out_queue'),
-		riveted = require('./lib/riveted'),
+		engagement = require('./lib/engagement'),
 
 		object = typeof exports !== 'undefined' ? exports : this; // For eventual node.js environment support
 
@@ -197,7 +197,7 @@
 			// Engagement tracking
 			engagementTrackingEnabled = false,
 			engagementTrackingOptions,
-			engagementTimer = new riveted.Timer(),
+			engagementTimer = new engagement.Timer(),
 
 			// Last activity timestamp
 			lastActivityTime,
