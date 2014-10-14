@@ -9,11 +9,17 @@
 ;(function() {
 
 	var
+		helpers = require('./helpers'),
+
 		object = typeof exports !== 'undefined' ? exports : this; // For eventual node.js environment support
 
-
 	object.Riveted = function Riveted(options) {
+
 		var
+			// Aliases
+			documentAlias = document,
+			windowAlias = window,
+
 			started = false,
 			stopped = false,
 			turnedOff = false,
@@ -43,31 +49,16 @@
 			}
 
 			// Basic activity event listeners
-			addListener(document, 'keydown', trigger);
-			addListener(document, 'click', trigger);
-			addListener(window, 'mousemove', throttle(trigger, 500));
-			addListener(window, 'scroll', throttle(trigger, 500));
+			helpers.addEventListener(documentAlias, 'keydown', trigger);
+			helpers.addEventListener(documentAlias, 'click', trigger);
+			helpers.addEventListener(windowAlias, 'mousemove', throttle(trigger, 500));
+			helpers.addEventListener(windowAlias, 'scroll', throttle(trigger, 500));
 
 			// Page visibility listeners
-			addListener(document, 'visibilitychange', visibilityChange);
-			addListener(document, 'webkitvisibilitychange', visibilityChange);
+			helpers.addEventListener(documentAlias, 'visibilitychange', visibilityChange);
+			helpers.addEventListener(documentAlias, 'webkitvisibilitychange', visibilityChange);
 		}
 
-		/*
-		 * Cross-browser event listening
-		 */
-
-		function addListener(element, eventName, handler) {
-			if (element.addEventListener) {
-				element.addEventListener(eventName, handler, false);
-			}
-			else if (element.attachEvent) {
-				element.attachEvent('on' + eventName, handler);
-			}
-			else {
-				element['on' + eventName] = handler;
-			}
-		}
 
 		/*
 		 * Throttle function borrowed from:
