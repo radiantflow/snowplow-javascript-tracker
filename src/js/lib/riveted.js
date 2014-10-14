@@ -9,18 +9,7 @@
 ;(function() {
 
 	var
-		lodash = require('../lib_managed/lodash'),
-
 		object = typeof exports !== 'undefined' ? exports : this; // For eventual node.js environment support
-
-	/*
-	 * Only log deprecation warnings if they won't cause an error
-	 */
-//	object.warn = function(message) {
-//		if (typeof console !== 'undefined') {
-//			console.warn('Snowplow: ' + message);
-//		}
-//	}
 
 
 	object.Riveted = function Riveted(options) {
@@ -35,31 +24,10 @@
 			sendEvent,
 			sendUserTiming,
 			reportInterval,
-			idleTimeout,
-			nonInteraction,
-			universalGA,
-			classicGA,
-			googleTagManager;
+			idleTimeout;
 
 
 		function init(options) {
-
-			/*
-			 * Determine which version of GA is being used
-			 * "ga", "_gaq", and "dataLayer" are the possible globals
-			 */
-
-			if (typeof ga === "function") {
-				universalGA = true;
-			}
-
-			if (typeof _gaq !== "undefined" && typeof _gaq.push === "function") {
-				classicGA = true;
-			}
-
-			if (typeof dataLayer !== "undefined" && typeof dataLayer.push === "function") {
-				googleTagManager = true;
-			}
 
 			// Set up options and defaults
 			options = options || {};
@@ -72,12 +40,6 @@
 
 			if (typeof options.userTimingHandler == 'function') {
 				sendUserTiming = options.userTimingHandler;
-			}
-
-			if ('nonInteraction' in options && (options.nonInteraction === false || options.nonInteraction === 'false')) {
-				nonInteraction = false;
-			} else {
-				nonInteraction = true;
 			}
 
 			// Basic activity event listeners
@@ -147,23 +109,7 @@
 		 */
 
 		sendUserTiming = function (timingValue) {
-
-			if (googleTagManager) {
-
-				dataLayer.push({'event': 'RivetedTiming', 'eventCategory': 'Riveted', 'timingVar': 'First Interaction', 'timingValue': timingValue});
-
-			} else {
-
-				if (universalGA) {
-					ga('send', 'timing', 'Riveted', 'First Interaction', timingValue);
-				}
-
-				if (classicGA) {
-					_gaq.push(['_trackTiming', 'Riveted', 'First Interaction', timingValue, null, 100]);
-				}
-
-			}
-
+			//ga('send', 'timing', 'Riveted', 'First Interaction', timingValue);
 		};
 
 		/*
@@ -171,23 +117,7 @@
 		 */
 
 		sendEvent = function (time) {
-
-			if (googleTagManager) {
-
-				dataLayer.push({'event': 'Riveted', 'eventCategory': 'Riveted', 'eventAction': 'Time Spent', 'eventLabel': time, 'eventValue': reportInterval, 'eventNonInteraction': nonInteraction});
-
-			} else {
-
-				if (universalGA) {
-					ga('send', 'event', 'Riveted', 'Time Spent', time.toString(), reportInterval, {'nonInteraction': nonInteraction});
-				}
-
-				if (classicGA) {
-					_gaq.push(['_trackEvent', 'Riveted', 'Time Spent', time.toString(), reportInterval, nonInteraction]);
-				}
-
-			}
-
+			//dataLayer.push({'event': 'Riveted', 'eventCategory': 'Riveted', 'eventAction': 'Time Spent', 'eventLabel': time, 'eventValue': reportInterval, 'eventNonInteraction': nonInteraction});
 		};
 
 		function setIdle() {
