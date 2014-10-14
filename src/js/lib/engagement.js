@@ -27,16 +27,21 @@
 			startTime = new Date(),
 			clockTimer = null,
 			idleTimer = null,
+			sendActivity = null,
 			reportInterval,
 			idleTimeout;
 
 
-		function init(options) {
+		function init(activityHandler, options) {
 
 			// Set up options and defaults
 			options = options || {};
 			reportInterval = parseInt(options.reportInterval, 10) || 5;
 			idleTimeout = parseInt(options.idleTimeout, 10) || 30;
+
+			if (typeof activityHandler == 'function') {
+				sendActivity = activityHandler;
+			}
 
 			// Basic activity event listeners
 			helpers.addEventListener(documentAlias, 'keydown', trigger);
@@ -100,6 +105,9 @@
 
 		function clock() {
 			clockTime += 1;
+			if (clockTime > 0) {
+				sendActivity();
+			}
 		}
 
 		function stopClock() {

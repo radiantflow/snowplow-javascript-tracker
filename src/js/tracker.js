@@ -592,7 +592,7 @@
 
 			// Start Engagement Timer if enabled.
 			if (engagementTrackingEnabled) {
-				engagementTimer.init(engagementTrackingOptions);
+				engagementTimer.init(activityHandler, engagementTrackingOptions);
 			}
 
 			// Log page view
