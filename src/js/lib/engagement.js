@@ -43,50 +43,13 @@
 			// Basic activity event listeners
 			helpers.addEventListener(documentAlias, 'keydown', trigger);
 			helpers.addEventListener(documentAlias, 'click', trigger);
-			helpers.addEventListener(windowAlias, 'mousemove', throttle(trigger, 500));
-			helpers.addEventListener(windowAlias, 'scroll', throttle(trigger, 500));
+			helpers.addThrottledEventListener(windowAlias, 'mousemove', trigger);
+			helpers.addThrottledEventListener(windowAlias, 'scroll', trigger);
 
 			// Page visibility listeners
 			helpers.addEventListener(documentAlias, 'visibilitychange', visibilityChange);
 			helpers.addEventListener(documentAlias, 'webkitvisibilitychange', visibilityChange);
 		}
-
-
-		/*
-		 * Throttle function borrowed from:
-		 * Underscore.js 1.5.2
-		 * http://underscorejs.org
-		 * (c) 2009-2013 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
-		 * Underscore may be freely distributed under the MIT license.
-		 */
-
-		function throttle(func, wait) {
-			var context, args, result;
-			var timeout = null;
-			var previous = 0;
-			var later = function () {
-				previous = new Date;
-				timeout = null;
-				result = func.apply(context, args);
-			};
-			return function () {
-				var now = new Date;
-				if (!previous) previous = now;
-				var remaining = wait - (now - previous);
-				context = this;
-				args = arguments;
-				if (remaining <= 0) {
-					clearTimeout(timeout);
-					timeout = null;
-					previous = now;
-					result = func.apply(context, args);
-				} else if (!timeout) {
-					timeout = setTimeout(later, remaining);
-				}
-				return result;
-			};
-		}
-
 
 
 		function setIdle() {

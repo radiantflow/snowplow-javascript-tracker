@@ -51,7 +51,7 @@
 			}
 		}
 		return title;
-	}
+	};
 
 	/*
 	 * Extract hostname from URL
@@ -62,7 +62,7 @@
 			matches = e.exec(url);
 
 		return matches ? matches[1] : url;
-	}
+	};
 
 	/*
 	 * Fix-up domain
@@ -79,7 +79,7 @@
 			domain = domain.slice(1);
 		}
 		return domain;
-	}
+	};
 
 	/*
 	 * Get page referrer
@@ -111,7 +111,7 @@
 			referrer = document.referrer;
 		}
 		return referrer;
-	}
+	};
 
 	/*
 	 * Cross-browser helper function to add event handler
@@ -125,7 +125,50 @@
 			return element.attachEvent('on' + eventType, eventHandler);
 		}
 		element['on' + eventType] = eventHandler;
-	}
+	};
+
+	/*
+	 * Cross-browser helper function to add throttled event handler
+	 */
+	object.addThrottledEventListener = function (element, eventType, eventHandler, throttleWait, useCapture) {
+		throttleWait = throttleWait || 500;
+		object.addEventListener(element, eventType, object.throttle(eventHandler, throttleWait), useCapture);
+	};
+
+	/*
+	 * Throttle function borrowed from:
+	 * Underscore.js 1.5.2
+	 * http://underscorejs.org
+	 * (c) 2009-2013 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
+	 * Underscore may be freely distributed under the MIT license.
+	 */
+
+	object.throttle = function (func, wait) {
+		var context, args, result;
+		var timeout = null;
+		var previous = 0;
+		var later = function () {
+			previous = new Date;
+			timeout = null;
+			result = func.apply(context, args);
+		};
+		return function () {
+			var now = new Date;
+			if (!previous) previous = now;
+			var remaining = wait - (now - previous);
+			context = this;
+			args = arguments;
+			if (remaining <= 0) {
+				clearTimeout(timeout);
+				timeout = null;
+				previous = now;
+				result = func.apply(context, args);
+			} else if (!timeout) {
+				timeout = setTimeout(later, remaining);
+			}
+			return result;
+		};
+	};
 
 	/*
 	 * Return value from name-value pair in querystring 
@@ -136,7 +179,7 @@
 			return null;
 		}
 		return decodeURIComponent(match[1].replace(/\+/g, ' '));
-	}
+	};
 
 	/*
 	 * Remove from an object every property whose value is
@@ -150,7 +193,7 @@
 			}
 		}
 		return collection;
-	}
+	};
 
 	/*
 	 * Only log deprecation warnings if they won't cause an error
