@@ -45,6 +45,7 @@
 		sha1 = require('sha1'),
 		requestQueue = require('./out_queue'),
 		engagement = require('./lib/engagement'),
+		uuid = require('uuid');
 
 		object = typeof exports !== 'undefined' ? exports : this; // For eventual node.js environment support
 
@@ -523,6 +524,7 @@
 			sb.addRaw('duid', _domainUserId); // Set to our local variable
 
 			// Encode all these
+			sb.add('eid', uuid.v4());
 			sb.add('p', configPlatform);
 			sb.add('tv', version);
 			sb.add('fp', userFingerprint);
