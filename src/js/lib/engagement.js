@@ -28,16 +28,13 @@
 			clockTimer = null,
 			idleTimer = null,
 			sendActivity = null,
-			reportInterval,
 			idleTimeout;
 
 
-		function init(activityHandler, options) {
+		function init(activityHandler, idle) {
 
 			// Set up options and defaults
-			options = options || {};
-			reportInterval = parseInt(options.reportInterval, 10) || 5;
-			idleTimeout = parseInt(options.idleTimeout, 10) || 30;
+			idleTimeout = parseInt(idle, 10) || 30;
 
 			if (typeof activityHandler == 'function') {
 				sendActivity = activityHandler;

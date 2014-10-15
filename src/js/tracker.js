@@ -196,7 +196,7 @@
 
 			// Engagement tracking
 			engagementTrackingEnabled = false,
-			engagementTrackingOptions,
+			engagementIdleTimeout,
 			engagementTimer = new engagement.Timer(),
 
 			// Last activity timestamp
@@ -592,7 +592,7 @@
 
 			// Start Engagement Timer if enabled.
 			if (engagementTrackingEnabled) {
-				engagementTimer.init(activityHandler, engagementTrackingOptions);
+				engagementTimer.init(activityHandler, engagementIdleTimeout);
 			}
 
 			// Log page view
@@ -1288,10 +1288,10 @@
 			 *
 			 * @param object options Options for engagement tracking.
 			 */
-			enableEngagementTracking: function (options) {
+			enableEngagementTracking: function (idleTimeout) {
 				//options = options || {};
 				engagementTrackingEnabled = true;
-				engagementTrackingOptions = options
+				engagementIdleTimeout = idleTimeout;
 			},
 
 			/**
