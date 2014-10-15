@@ -605,12 +605,14 @@
 			var request = getRequest(sb);
 			sendRequest(request, configTrackerPause);
 
-			var pageTimestamp = sb.get('dtm');
-
 			// Send ping (to log that user has stayed on page)
 			var now = new Date();
 			if (configMinimumVisitTime && configHeartBeatTimer && !activityTrackingInstalled) {
 				activityTrackingInstalled = true;
+
+				var
+					pageTimestamp = sb.get('dtm'),
+					pageEid = sb.get('eid');
 
 				// Capture our initial scroll points
 				resetMaxScrolls();
@@ -641,7 +643,7 @@
 					if ((lastActivityTime + configHeartBeatTimer) > now.getTime()) {
 						// Send ping if minimum visit time has elapsed
 						if (configMinimumVisitTime < now.getTime()) {
-							logPagePing(pageTitle, pageTimestamp, context); // Grab the min/max globals
+							logPagePing(pageTitle, pageTimestamp, pageEid, context); // Grab the min/max globals
 						}
 					}
 				}, configHeartBeatTimer);
@@ -657,12 +659,13 @@
 		 * @param string pageTitle The page title to attach to this page ping
 		 * @param object context Custom context relating to the event
 		 */
-		function logPagePing(pageTitle, pageTimestamp, context) {
+		function logPagePing(pageTitle, pageTimestamp, pageEid, context) {
 			var sb = payload.payloadBuilder(configEncodeBase64);
 			var de = documentAlias.documentElement; // Alias
 			sb.add('e', 'pp'); // 'pp' for Page Ping
 			sb.add('page', pageTitle);
 			sb.addRaw('pp_load', pageTimestamp);
+			sb.add('pp_eid', pageEid);
 			sb.addRaw('pp_mix', minXOffset); // Global
 			sb.addRaw('pp_max', maxXOffset); // Global
 			sb.addRaw('pp_miy', minYOffset); // Global
