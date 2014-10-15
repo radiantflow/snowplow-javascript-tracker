@@ -622,14 +622,14 @@
 				helpers.addEventListener(documentAlias, 'click', activityHandler);
 				helpers.addEventListener(documentAlias, 'mouseup', activityHandler);
 				helpers.addEventListener(documentAlias, 'mousedown', activityHandler);
-				helpers.addEventListener(documentAlias, 'mousemove', activityHandler);
-				helpers.addEventListener(documentAlias, 'mousewheel', activityHandler);
-				helpers.addEventListener(windowAlias, 'DOMMouseScroll', activityHandler);
-				helpers.addEventListener(windowAlias, 'scroll', scrollHandler); // Will updateMaxScrolls() for us
+				helpers.addThrottledEventListener(documentAlias, 'mousemove', activityHandler);
+				helpers.addThrottledEventListener(documentAlias, 'mousewheel', activityHandler);
+				helpers.addThrottledEventListener(windowAlias, 'DOMMouseScroll', activityHandler);
+				helpers.addThrottledEventListener(windowAlias, 'scroll', scrollHandler); // Will updateMaxScrolls() for us
 				helpers.addEventListener(documentAlias, 'keypress', activityHandler);
 				helpers.addEventListener(documentAlias, 'keydown', activityHandler);
 				helpers.addEventListener(documentAlias, 'keyup', activityHandler);
-				helpers.addEventListener(windowAlias, 'resize', activityHandler);
+				helpers.addThrottledEventListener(windowAlias, 'resize', activityHandler);
 				helpers.addEventListener(windowAlias, 'focus', activityHandler);
 				helpers.addEventListener(windowAlias, 'blur', activityHandler);
 
