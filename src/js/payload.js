@@ -104,10 +104,12 @@
 	 */
 	object.payloadBuilder = function (base64Encode) {
 		var str = '';
-		
+		var values = {};
+
 		var addNvPair = function (key, value, encode) {
 				if (value !== undefined && value !== null && value !== '') {
 				var sep = (str.length > 0) ? "&" : "?";
+				values[key] = value;
 				str += sep + key + '=' + (encode ? encodeURIComponent(value) : value);
 			}
 		};
@@ -118,6 +120,12 @@
 
 		var addRaw = function (key, value) {
 			addNvPair(key, value, false);
+		};
+
+		var getValue = function (key) {
+			if (key in values) {
+				return values[key];
+			}
 		};
 
 		var addJson = function (keyIfEncoded, keyIfNotEncoded, json) {
@@ -137,6 +145,7 @@
 			add: add,
 			addRaw: addRaw,
 			addJson: addJson,
+			get: getValue,
 			build: function() {
 				return str;
 			}
