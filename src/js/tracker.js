@@ -1303,6 +1303,15 @@
 			},
 
 			/**
+			 * Runs engagement tracking timer commands.
+			 *
+			 * @param string command Name of engagement timer command to run.
+			 */
+			engagementTracking: function (command) {
+				engagementTimer[command]();
+			},
+
+			/**
 			 * Frame buster
 			 */
 			killFrame: function () {
