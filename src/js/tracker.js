@@ -41,7 +41,7 @@
 		detectors = require('./lib/detectors'),
 		json2 = require('JSON'),
 		sha1 = require('sha1'),
-		pings = require('./pings'),
+		activities = require('./activities'),
 		links = require('./links'),
 		forms = require('./forms'),
 		requestQueue = require('./out_queue'),
@@ -189,7 +189,7 @@
 			ecommerceTransaction = ecommerceTransactionTemplate(),
 
 			// Manager for ping tracking
-			pingTrackingManager = pings.getPingTrackingManager(core, trackerId),
+			activityTrackingManager = activities.getActivityTrackingManager(core, trackerId),
 
 			// Manager for automatic link click tracking
 			linkTrackingManager = links.getLinkTrackingManager(core, trackerId),
@@ -512,7 +512,7 @@
 			var sb = core.trackPageView(pageUrl, pageTitle, referrerUrl, context);
 
 			// Install Activity Manager, if configured (to log that user has stayed on page)
-			pingTrackingManager.install(pageUrl, pageTitle, referrerUrl, context, sb);
+			activityTrackingManager.install(pageUrl, pageTitle, referrerUrl, context, sb);
 		}
 
 		/**
@@ -843,7 +843,7 @@
 			 * @param int heartBeatDelay Seconds to wait between pings
 			 */
 			enableActivityTracking: function (minimumVisitLength, heartBeatDelay) {
-				pingTrackingManager.enable(minimumVisitLength, heartBeatDelay);
+				activityTrackingManager.enable(minimumVisitLength, heartBeatDelay);
 			},
 
 			/**

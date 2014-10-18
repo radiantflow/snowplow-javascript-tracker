@@ -41,9 +41,9 @@ var lodash = require('./lib_managed/lodash'),
  *
  * @param object core The tracker core
  * @param string trackerId Unique identifier for the tracker instance
- * @return object PingTrackingManager instance
+ * @return object ActivityTrackingManager instance
  */
-object.getPingTrackingManager = function (core, trackerId) {
+object.getActivityTrackingManager = function (core, trackerId) {
 
 	var
 		// Aliases
