@@ -41,6 +41,7 @@
 		detectors = require('./lib/detectors'),
 		json2 = require('JSON'),
 		sha1 = require('sha1'),
+		pings = require('./pings'),
 		links = require('./links'),
 		forms = require('./forms'),
 		requestQueue = require('./out_queue'),
@@ -118,12 +119,6 @@
 			// Maximum delay to wait for web bug image to be fetched (in milliseconds)
 			configTrackerPause = argmap.hasOwnProperty('pageUnloadTimer') ? argmap.pageUnloadTimer : 500,
 
-			// Minimum visit time after initial page view (in milliseconds)
-			configMinimumVisitTime,
-
-			// Recurring heart beat after initial ping (in milliseconds)
-			configHeartBeatTimer,
-
 			// Disallow hash tags in URL. TODO: Should this be set to true by default?
 			configDiscardHashTag,
 
@@ -177,18 +172,6 @@
 			// Unique ID for the tracker instance used to mark links which are being tracked
 			trackerId = functionName + '_' + namespace,
 
-			// Guard against installing the activity tracker more than once per Tracker instance
-			activityTrackingInstalled = false,
-
-			// Last activity timestamp
-			lastActivityTime,
-
-			// How are we scrolling?
-			minXOffset,
-			maxXOffset,
-			minYOffset,
-			maxYOffset,
-
 			// Hash function
 			hash = sha1,
 
@@ -204,6 +187,9 @@
 			// Ecommerce transaction data
 			// Will be committed, sent and emptied by a call to trackTrans.
 			ecommerceTransaction = ecommerceTransactionTemplate(),
+
+			// Manager for ping tracking
+			pingTrackingManager = pings.getPingTrackingManager(core, trackerId),
 
 			// Manager for automatic link click tracking
 			linkTrackingManager = links.getLinkTrackingManager(core, trackerId),
@@ -366,70 +352,6 @@
 		}
 
 		/*
-		 * Process all "activity" events.
-		 * For performance, this function must have low overhead.
-		 */
-		function activityHandler() {
-			var now = new Date();
-			lastActivityTime = now.getTime();
-		}
-
-		/*
-		 * Process all "scroll" events.
-		 */
-		function scrollHandler() {
-			updateMaxScrolls();
-			activityHandler();
-		}
-
-		/*
-		 * Returns [pageXOffset, pageYOffset].
-		 * Adapts code taken from: http://www.javascriptkit.com/javatutors/static2.shtml
-		 */
-		function getPageOffsets() {
-			var iebody = (documentAlias.compatMode && documentAlias.compatMode != "BackCompat") ?
-				documentAlias.documentElement :
-				documentAlias.body;
-			return [iebody.scrollLeft || windowAlias.pageXOffset, iebody.scrollTop || windowAlias.pageYOffset];
-		}
-
-		/*
-		 * Quick initialization/reset of max scroll levels
-		 */
-		function resetMaxScrolls() {
-			var offsets = getPageOffsets();
-			
-			var x = offsets[0];
-			minXOffset = x;
-			maxXOffset = x;
-			
-			var y = offsets[1];
-			minYOffset = y;
-			maxYOffset = y;
-		}
-
-		/*
-		 * Check the max scroll levels, updating as necessary
-		 */
-		function updateMaxScrolls() {
-			var offsets = getPageOffsets();
-			
-			var x = offsets[0];
-			if (x < minXOffset) {
-				minXOffset = x;
-			} else if (x > maxXOffset) {
-				maxXOffset = x;
-			}
-
-			var y = offsets[1];
-			if (y < minYOffset) {
-				minYOffset = y;
-			} else if (y > maxYOffset) {
-				maxYOffset = y;
-			}	
-		}
-
-		/*
 		 * Sets the Visitor ID cookie: either the first time loadDomainUserIdCookie is called
 		 * or when there is a new visit or a new page view
 		 */
@@ -570,7 +492,10 @@
 		function logPageView(customTitle, performanceTracking, context) {
 
 			// Fixup page title. We'll pass this to logPagePing too.
-			var pageTitle = helpers.fixupTitle(customTitle || configTitle);
+			var
+				pageTitle = helpers.fixupTitle(customTitle || configTitle),
+				pageUrl = purify(configCustomUrl || locationHrefAlias),
+				referrerUrl = purify(configReferrerUrl)
 
 			if (performanceTracking) {
 				var performance = windowAlias.performance || windowAlias.mozPerformance || windowAlias.msPerformance || windowAlias.webkitPerformance;
@@ -584,62 +509,10 @@
 			}
 
 			// Log page view
-			core.trackPageView(purify(configCustomUrl || locationHrefAlias), pageTitle, purify(configReferrerUrl), context);
+			var sb = core.trackPageView(pageUrl, pageTitle, referrerUrl, context);
 
-			// Send ping (to log that user has stayed on page)
-			var now = new Date();
-			if (configMinimumVisitTime && configHeartBeatTimer && !activityTrackingInstalled) {
-				activityTrackingInstalled = true;
-
-				// Capture our initial scroll points
-				resetMaxScrolls();
-
-				// Add event handlers; cross-browser compatibility here varies significantly
-				// @see http://quirksmode.org/dom/events
-				helpers.addEventListener(documentAlias, 'click', activityHandler);
-				helpers.addEventListener(documentAlias, 'mouseup', activityHandler);
-				helpers.addEventListener(documentAlias, 'mousedown', activityHandler);
-				helpers.addThrottledEventListener(documentAlias, 'mousemove', activityHandler);
-				helpers.addThrottledEventListener(documentAlias, 'mousewheel', activityHandler);
-				helpers.addThrottledEventListener(windowAlias, 'DOMMouseScroll', activityHandler);
-				helpers.addThrottledEventListener(windowAlias, 'scroll', scrollHandler); // Will updateMaxScrolls() for us
-				helpers.addEventListener(documentAlias, 'keypress', activityHandler);
-				helpers.addEventListener(documentAlias, 'keydown', activityHandler);
-				helpers.addEventListener(documentAlias, 'keyup', activityHandler);
-				helpers.addThrottledEventListener(windowAlias, 'resize', activityHandler);
-				helpers.addEventListener(windowAlias, 'focus', activityHandler);
-				helpers.addEventListener(windowAlias, 'blur', activityHandler);
-
-				// Periodic check for activity.
-				lastActivityTime = now.getTime();
-				setInterval(function heartBeat() {
-					var now = new Date();
-
-					// There was activity during the heart beat period;
-					// on average, this is going to overstate the visitDuration by configHeartBeatTimer/2
-					if ((lastActivityTime + configHeartBeatTimer) > now.getTime()) {
-						// Send ping if minimum visit time has elapsed
-						if (configMinimumVisitTime < now.getTime()) {
-							logPagePing(pageTitle, context); // Grab the min/max globals
-						}
-					}
-				}, configHeartBeatTimer);
-			}
-		}
-
-		/**
-		 * Log that a user is still viewing a given page
-		 * by sending a page ping.
-		 * Not part of the public API - only called from
-		 * logPageView() above.
-		 *
-		 * @param string pageTitle The page title to attach to this page ping
-		 * @param object context Custom context relating to the event
-		 */
-		function logPagePing(pageTitle, context) {
-			resetMaxScrolls();
-			core.trackPagePing(purify(configCustomUrl || locationHrefAlias), pageTitle, purify(configReferrerUrl),
-				minXOffset, maxXOffset, minYOffset, maxYOffset, context);
+			// Install Activity Manager, if configured (to log that user has stayed on page)
+			pingTrackingManager.install(pageUrl, pageTitle, referrerUrl, context, sb);
 		}
 
 		/**
@@ -970,8 +843,7 @@
 			 * @param int heartBeatDelay Seconds to wait between pings
 			 */
 			enableActivityTracking: function (minimumVisitLength, heartBeatDelay) {
-				configMinimumVisitTime = new Date().getTime() + minimumVisitLength * 1000;
-				configHeartBeatTimer = heartBeatDelay * 1000;
+				pingTrackingManager.enable(minimumVisitLength, heartBeatDelay);
 			},
 
 			/**
