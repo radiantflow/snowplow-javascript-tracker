@@ -225,9 +225,9 @@ object.getActivityTrackingManager = function (core, trackerId) {
 	 * @param object context Custom context relating to the event
 	 */
 	function logPagePing(pageUrl, pageTitle, referrerUrl, context) {
-		resetMaxScrolls();
 		core.trackPagePing(pageUrl, pageTitle, referrerUrl,
 			minXOffset, maxXOffset, minYOffset, maxYOffset, context);
+		resetMaxScrolls();
 	}
 
 	return {
