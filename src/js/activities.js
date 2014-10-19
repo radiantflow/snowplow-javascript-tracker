@@ -73,6 +73,11 @@ object.getActivityTrackingManager = function (core, trackerId) {
 		minYOffset,
 		maxYOffset,
 
+		loadMinXOffset,
+		loadMaxXOffset,
+		loadMinYOffset,
+		loadMaxYOffset,
+
 		// Engagement tracking
 		configEngagementIdleTimeout,
 		engagementEnabled = false,
@@ -114,6 +119,7 @@ object.getActivityTrackingManager = function (core, trackerId) {
 
 			// Capture our initial scroll points
 			resetMaxScrolls();
+			resetLoadMaxScrolls();
 
 			// Add event listeners
 			addListeners();
@@ -169,6 +175,7 @@ object.getActivityTrackingManager = function (core, trackerId) {
 	 */
 	function scrollHandler() {
 		updateMaxScrolls();
+		updateLoadMaxScrolls();
 		activityHandler();
 	}
 
@@ -220,6 +227,41 @@ object.getActivityTrackingManager = function (core, trackerId) {
 	}
 
 	/*
+	 * Quick initialization/reset of load max scroll levels
+	 */
+	function resetLoadMaxScrolls() {
+		var offsets = getPageOffsets();
+
+		var x = offsets[0];
+		loadMinXOffset = x;
+		loadMaxXOffset = x;
+
+		var y = offsets[1];
+		loadMinYOffset = y;
+		loadMaxYOffset = y;
+	}
+
+	/*
+	 * Check the load max scroll levels, updating as necessary
+	 */
+	function updateLoadMaxScrolls() {
+		var offsets = getPageOffsets();
+
+		var x = offsets[0];
+		if (x < loadMinXOffset) {
+			loadMinXOffset = x;
+		} else if (x > loadMaxXOffset) {
+			loadMaxXOffset = x;
+		}
+
+		var y = offsets[1];
+		if (y < loadMinYOffset) {
+			loadMinYOffset = y;
+		} else if (y > loadMaxYOffset) {
+			loadMaxYOffset = y;
+		}
+	}
+	/*
 	 * Update last activity time
 	 */
 	function updateLastActivityTime() {
@@ -269,6 +311,7 @@ object.getActivityTrackingManager = function (core, trackerId) {
 
 		core.trackPagePing(pageUrl, pageTitle, referrerUrl,
 			minXOffset, maxXOffset, minYOffset, maxYOffset,
+			loadMinXOffset, loadMaxXOffset, loadMinYOffset, loadMaxYOffset,
 			xOffset, yOffset,
 			pageEid, loadTime, engagedTime,
 			context);
