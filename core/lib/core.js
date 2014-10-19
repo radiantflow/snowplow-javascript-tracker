@@ -290,7 +290,7 @@ function trackerCore(base64, callback) {
 		 * @param number tstamp Timestamp of the event
 		 * @return object Payload
 		 */
-		trackPagePing: function (pageUrl, pageTitle, referrer, minXOffset, maxXOffset, minYOffset, maxYOffset, context, tstamp) {
+		trackPagePing: function (pageUrl, pageTitle, referrer, minXOffset, maxXOffset, minYOffset, maxYOffset, xOffset, yOffset, pageEid, loadTime, engagedTime, context, tstamp) {
 			var sb = payload.payloadBuilder(base64);
 			sb.add('e', 'pp'); // 'pp' for Page Ping
 			sb.add('url', pageUrl);
@@ -300,6 +300,11 @@ function trackerCore(base64, callback) {
 			sb.add('pp_max', maxXOffset);
 			sb.add('pp_miy', minYOffset);
 			sb.add('pp_may', maxYOffset);
+			sb.add('pp_x', xOffset);
+			sb.add('pp_y', yOffset);
+			sb.add('pp_eid', pageEid);
+			sb.add('pp_lt', loadTime);
+			sb.add('pp_et', engagedTime);
 
 			return track(sb, context, tstamp);
 		},
