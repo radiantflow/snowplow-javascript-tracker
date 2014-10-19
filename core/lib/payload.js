@@ -97,10 +97,17 @@
 			}
 		};
 
+		var getValue = function (key) {
+			if (key in dict) {
+				return dict[key];
+			}
+		};
+
 		return {
 			add: add,
 			addDict: addDict,
 			addJson: addJson,
+			get: getValue,
 			build: function () {
 				return dict;
 			}
