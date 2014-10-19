@@ -847,6 +847,25 @@
 			},
 
 			/**
+			 * Enables engagement activity tracking. Timer is counted and sent with pings.
+			 *
+			 * @param int idleTimeout Idle seconds before engagment stops tracking.
+			 */
+			enableEngagementTracking: function (idleTimeout) {
+				activityTrackingManager.enableEngagementTracking(idleTimeout);
+			},
+
+
+			/**
+			* Runs engagement tracking timer commands.
+			*
+			* @param string command Name of engagement timer command to run.
+			*/
+//			engagementTracking: function (command) {
+//				engagementTimer[command]();
+//			},
+
+			/**
 			 * Enables automatic form tracking.
 			 * An event will be fired when a form field is changed or a form submitted.
 			 * This can be called multiple times: only forms not already tracked will be tracked.

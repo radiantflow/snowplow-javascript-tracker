@@ -34,6 +34,7 @@
 
 var lodash = require('./lib_managed/lodash'),
 	helpers = require('./lib/helpers'),
+	engagement = require('./lib/engagement'),
 	object = typeof exports !== 'undefined' ? exports : this;
 
 /**
@@ -70,7 +71,14 @@ object.getActivityTrackingManager = function (core, trackerId) {
 		minXOffset,
 		maxXOffset,
 		minYOffset,
-		maxYOffset;
+		maxYOffset,
+
+		// Engagement tracking
+		configEngagementIdleTimeout,
+		engagementEnabled = false,
+		engagementTimer = new engagement.Timer(),
+		engagementHandler = null;
+
 
 	/*
 	 * Initialize the activity tracker.
@@ -82,12 +90,27 @@ object.getActivityTrackingManager = function (core, trackerId) {
 	}
 
 	/*
+	 * Initialize engagement tracking.
+	 */
+	function enableEngagementTracking(idleTimeout) {
+		configEngagementIdleTimeout = idleTimeout;
+		engagementTimer.setTimeout(idleTimeout);
+		engagementEnabled = true;
+	}
+
+	/*
 	 * Install the activity tracker.
 	 */
 	function install(pageUrl, pageTitle, referrerUrl, context, pageView) {
 
 		if (enabled && !installed) {
 			installed = true;
+
+			// Start Engagement Timer if enabled.
+			if (engagementEnabled) {
+				engagementTimer.init(updateLastActivityTime);
+				engagementHandler = engagementTimer.trigger;
+			}
 
 			// Capture our initial scroll points
 			resetMaxScrolls();
@@ -127,8 +150,12 @@ object.getActivityTrackingManager = function (core, trackerId) {
 	 * For performance, this function must have low overhead.
 	 */
 	function activityHandler() {
-		var now = new Date();
-		lastActivityTime = now.getTime();
+		updateLastActivityTime();
+
+		// If set run engagementHandler
+		if (engagementHandler) {
+			engagementHandler();
+		}
 	}
 
 	/*
@@ -225,6 +252,7 @@ object.getActivityTrackingManager = function (core, trackerId) {
 	 * @param object context Custom context relating to the event
 	 */
 	function logPagePing(pageUrl, pageTitle, referrerUrl, context) {
+		var time = engagementTimer.time();
 		core.trackPagePing(pageUrl, pageTitle, referrerUrl,
 			minXOffset, maxXOffset, minYOffset, maxYOffset, context);
 		resetMaxScrolls();
@@ -232,6 +260,7 @@ object.getActivityTrackingManager = function (core, trackerId) {
 
 	return {
 		enable: enable,
+		enableEngagementTracking: enableEngagementTracking,
 		install: install
 	};
 };

@@ -10,15 +10,13 @@
 
 	var
 		helpers = require('./helpers'),
-
-		object = typeof exports !== 'undefined' ? exports : this; // For eventual node.js environment support
+		object = typeof exports !== 'undefined' ? exports : this;
 
 	object.Timer = function Timer() {
 
 		var
 			// Aliases
 			documentAlias = document,
-			windowAlias = window,
 
 			started = false,
 			stopped = false,
@@ -27,28 +25,22 @@
 			startTime = new Date(),
 			clockTimer = null,
 			idleTimer = null,
-			sendActivity = null,
+			updateTimeHandler = null,
 			idleTimeout;
 
 
-		function init(activityHandler, idle) {
-
+		function setTimeout( idle) {
 			// Set up options and defaults
 			idleTimeout = parseInt(idle, 10) || 30;
+		}
 
-			if (typeof activityHandler == 'function') {
-				sendActivity = activityHandler;
-			}
-
-			// Basic activity event listeners
-			helpers.addEventListener(documentAlias, 'keydown', trigger);
-			helpers.addEventListener(documentAlias, 'click', trigger);
-			helpers.addThrottledEventListener(windowAlias, 'mousemove', trigger);
-			helpers.addThrottledEventListener(windowAlias, 'scroll', trigger);
-
+		function init(updateTime) {
+			updateTimeHandler = updateTime;
 			// Page visibility listeners
 			helpers.addEventListener(documentAlias, 'visibilitychange', visibilityChange);
 			helpers.addEventListener(documentAlias, 'webkitvisibilitychange', visibilityChange);
+
+			startTracking();
 		}
 
 
@@ -66,7 +58,9 @@
 		function clock() {
 			clockTime += 1;
 			if (clockTime > 0) {
-				sendActivity();
+				if (updateTimeHandler) {
+					updateTimeHandler();
+				}
 			}
 		}
 
@@ -131,7 +125,9 @@
 		 ************************************************************/
 
 		return {
+			setTimeout: setTimeout,
 			init: init,
+			start: startTracking,
 			trigger: trigger,
 			setIdle: setIdle,
 			on: turnOn,
