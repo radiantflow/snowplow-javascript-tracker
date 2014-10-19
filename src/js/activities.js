@@ -57,15 +57,15 @@ object.getActivityTrackingManager = function (core, trackerId) {
 		// Guard against installing the activity tracker more than once per Tracker instance
 		installed = false,
 
-
 		// Minimum visit time after initial page view (in milliseconds)
 		configMinimumVisitTime,
 
 		// Recurring heart beat after initial ping (in milliseconds)
 		configHeartBeatTimer,
 
-		// Last activity timestamp
+		// Times
 		lastActivityTime,
+		loadTime,
 
 		// How are we scrolling?
 		minXOffset,
@@ -118,18 +118,24 @@ object.getActivityTrackingManager = function (core, trackerId) {
 			// Add event listeners
 			addListeners();
 
+			// Set pageEid
+			var pageEid = pageView.get('eid');
+
 			// Update last activity time.
 			lastActivityTime = updateLastActivityTime();
 
+			// Update load time
+			loadTime = pageView.get('dtm');
+
 			// Set up activity timer.
-			setTimer(pageUrl, pageTitle, referrerUrl, context);
+			setTimer(pageUrl, pageTitle, pageEid, referrerUrl, context);
 		}
 	}
 
 	/*
 	 * Set up the timer at heartbeat interval.
 	 */
-	function setTimer(pageUrl,pageTitle, referrerUrl, context) {
+	function setTimer(pageUrl,pageTitle, pageEid, referrerUrl, context) {
 		// Periodic check for activity.
 		setInterval(function heartBeat() {
 			var now = new Date();
@@ -139,7 +145,7 @@ object.getActivityTrackingManager = function (core, trackerId) {
 			if ((lastActivityTime + configHeartBeatTimer) > now.getTime()) {
 				// Send ping if minimum visit time has elapsed
 				if (configMinimumVisitTime < now.getTime()) {
-					logPagePing(pageUrl, pageTitle, referrerUrl, context); // Grab the min/max globals
+					logPagePing(pageUrl, pageTitle, pageEid, referrerUrl, context); // Grab the min/max globals
 				}
 			}
 		}, configHeartBeatTimer);
@@ -248,13 +254,17 @@ object.getActivityTrackingManager = function (core, trackerId) {
 	 *
 	 * @param string pageUrl The page url to attach to this page ping
 	 * @param string pageTitle The page title to attach to this page ping
+	 * @param string pageEid The page uuid to attach to this page ping
 	 * @param string referrerUrl The referrer url to attach to this page ping
 	 * @param object context Custom context relating to the event
 	 */
-	function logPagePing(pageUrl, pageTitle, referrerUrl, context) {
-		var time = engagementTimer.time();
+	function logPagePing(pageUrl, pageTitle, pageEid, referrerUrl, context) {
+		var engagedTime = engagementTimer.time();
+
 		core.trackPagePing(pageUrl, pageTitle, referrerUrl,
-			minXOffset, maxXOffset, minYOffset, maxYOffset, context);
+			minXOffset, maxXOffset, minYOffset, maxYOffset,
+			pageEid, loadTime, engagedTime,
+			context);
 		resetMaxScrolls();
 	}
 
