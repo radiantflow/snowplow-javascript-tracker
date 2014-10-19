@@ -261,8 +261,15 @@ object.getActivityTrackingManager = function (core, trackerId) {
 	function logPagePing(pageUrl, pageTitle, pageEid, referrerUrl, context) {
 		var engagedTime = engagementTimer.time();
 
+		var offsets = getPageOffsets();
+
+		var
+			xOffset = offsets[0],
+			yOffset = offsets[1];
+
 		core.trackPagePing(pageUrl, pageTitle, referrerUrl,
 			minXOffset, maxXOffset, minYOffset, maxYOffset,
+			xOffset, yOffset,
 			pageEid, loadTime, engagedTime,
 			context);
 		resetMaxScrolls();
