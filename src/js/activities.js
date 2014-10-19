@@ -94,7 +94,7 @@ object.getActivityTrackingManager = function (core, trackerId) {
 	 */
 	function enableEngagementTracking(idleTimeout) {
 		configEngagementIdleTimeout = idleTimeout;
-		engagementTimer.setTimeout(idleTimeout);
+		engagementTimer.setIdleTimeout(idleTimeout);
 		engagementEnabled = true;
 	}
 

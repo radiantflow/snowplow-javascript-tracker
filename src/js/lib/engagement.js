@@ -29,7 +29,7 @@
 			idleTimeout;
 
 
-		function setTimeout( idle) {
+		function setIdleTimeout( idle) {
 			// Set up options and defaults
 			idleTimeout = parseInt(idle, 10) || 30;
 		}
@@ -125,7 +125,7 @@
 		 ************************************************************/
 
 		return {
-			setTimeout: setTimeout,
+			setIdleTimeout: setIdleTimeout,
 			init: init,
 			start: startTracking,
 			trigger: trigger,
@@ -134,7 +134,6 @@
 			off: turnOff,
 			time: time
 		};
-
 
 	}
 
